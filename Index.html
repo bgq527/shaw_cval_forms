@@ -36,6 +36,12 @@
         div.innerHTML = '<p>Your email: <strong>' + email +'</strong>.</p> <p>Make sure that you <strong>USE THE EMAIL ADDRESS ABOVE</strong> as you are filling out forms -- it is how we know if you finished a species or not.</p>';
       }
 
+      function show_dropdown(dropdown_code){
+
+        var div = document.getElementById('familydiv');
+        div.innerHTML = dropdown_code;
+      }
+
 
       // NOT MINE https://www.w3schools.com/howto/howto_js_filter_dropdown.asp AND IS NOT MINE
       function filterFunction() {
@@ -55,11 +61,13 @@
 }
 
       google.script.run.withSuccessHandler(show_email).getEmail();
+      google.script.run.withSuccessHandler(show_dropdown).generate_dropdown();
 
       function update_search(str_value){
 
         var family_input = document.getElementById("familysearch");
-        family_input.value = str_value
+        family_input.value = str_value;
+        filterFunction();
       }
     </script>
   </head>
@@ -72,14 +80,8 @@
 
 
     <!-- NOT MINE https://www.w3schools.com/howto/howto_js_filter_dropdown.asp -->
-    <div class="dropdown">
-  <div id="myDropdown" class="dropdown-content">
-    <input type="text" placeholder="Search.." id="familysearch" onkeyup="filterFunction()">
-    <a href="javascript:;" onclick="update_search(this.innerText)">Aspleniaceae</a>
-    <a href="javascript:;" onclick="update_search(this.innerText)">Rosaceae</a>
-    <a href="javascript:;" onclick="update_search(this.innerText)">Asteraceae</a>
-    <a href="javascript:;" onclick="update_search(this.innerText)">Poaceae</a>
-  </div>
+    <div id="familydiv" class="dropdown">
+    Loading... please wait
 </div>
 
 

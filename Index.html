@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <?!= include('stylesheet') ?>
+
+    <script>
+      // Prevent forms from submitting.
+      function preventFormSubmit() {
+        var forms = document.querySelectorAll('form');
+        for (var i = 0; i < forms.length; i++) {
+          forms[i].addEventListener('submit', function(event) {
+            event.preventDefault();
+          });
+        }
+      }
+      window.addEventListener('load', preventFormSubmit);
+
+      function search() {
+        var div = document.getElementById('output');
+        var family = document.getElementById('familysearch');
+        div.innerHTML = 'Searching for: ' + family.value + ". <strong>Please wait, this may take some time.</strong>";
+        google.script.run.withSuccessHandler(update).generate_result(family.value);
+      }
+
+      function update(result){
+        var div = document.getElementById('output');
+        div.innerHTML = '<p>' + result + '</p>';
+      }
+
+      function show_email(email){
+
+        var div = document.getElementById('showemail');
+        div.innerHTML = '<p>Your email: <strong>' + email +'</strong>.</p> <p>Make sure that you <strong>USE THE EMAIL ADDRESS ABOVE</strong> as you are filling out forms -- it is how we know if you finished a species or not.</p>';
+      }
+
+
+      // NOT MINE https://www.w3schools.com/howto/howto_js_filter_dropdown.asp AND IS NOT MINE
+      function filterFunction() {
+  var input, filter, ul, li, a, i;
+  input = document.getElementById("familysearch");
+  filter = input.value.toUpperCase();
+  div = document.getElementById("myDropdown");
+  a = div.getElementsByTagName("a");
+  for (i = 0; i < a.length; i++) {
+    txtValue = a[i].textContent || a[i].innerText;
+    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+      a[i].style.display = "";
+    } else {
+      a[i].style.display = "none";
+    }
+  }
+}
+
+      google.script.run.withSuccessHandler(show_email).getEmail();
+
+      function update_search(str_value){
+
+        var family_input = document.getElementById("familysearch");
+        family_input.value = str_value
+      }
+    </script>
+  </head>
+  <body>
+    <h1> Sift Species </h1>
+    <strong> This form is updated asynchronously -- this would mean that you may have to wait a little bit for information to be updated. Once it does, it will show below.</strong>
+    <p></p>
+    <div id="showemail"></div>
+    Enter family:
+
+
+    <!-- NOT MINE https://www.w3schools.com/howto/howto_js_filter_dropdown.asp -->
+    <div class="dropdown">
+  <div id="myDropdown" class="dropdown-content">
+    <input type="text" placeholder="Search.." id="familysearch" onkeyup="filterFunction()">
+    <a href="javascript:;" onclick="update_search(this.innerText)">Aspleniaceae</a>
+    <a href="javascript:;" onclick="update_search(this.innerText)">Rosaceae</a>
+    <a href="javascript:;" onclick="update_search(this.innerText)">Asteraceae</a>
+    <a href="javascript:;" onclick="update_search(this.innerText)">Poaceae</a>
+  </div>
+</div>
+
+
+    <form id="myForm" onsubmit="search()">
+      <input type="submit" value="Submit" />
+    </form>
+    <div id="output"></div>
+ </body>
+</html>

@@ -6,6 +6,32 @@
     <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
     <?!= include('stylesheet') ?>
 
+    <style>
+    #customers {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+    }
+
+    #customers td, #customers th {
+    border: 1px solid #ddd;
+    padding: 8px;
+    }
+
+    #customers tr:nth-child(even){background-color: #f2f2f2;}
+
+    #customers tr:hover {background-color: #ddd;}
+
+    #customers th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+    }
+
+    </style>
+
     <script>
       // Prevent forms from submitting.
       function preventFormSubmit() {
@@ -21,73 +47,164 @@
       function search() {
         var div = document.getElementById('output');
         var family = document.getElementById('familysearch');
+        var tnstatus = document.getElementById('tnstatus');
+        var kystatus = document.getElementById('kystatus');
+        var wetlanda = document.getElementById('wetlanda');
+        var wetlande = document.getElementById('wetlande');
+        var seen = document.getElementById('showseen');
         div.innerHTML = 'Searching for: ' + family.value + ". <strong>Please wait, this may take some time.</strong>";
-        google.script.run.withSuccessHandler(update).generate_result(family.value);
+        google.script.run.withSuccessHandler(update).generate_result(family.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value);
+      }
+
+      function select_species(species_name) {
+        var div = document.getElementById('output');
+        div.innerHTML = 'Loading information for: ' + species_name + ". <strong>Please wait, this may take some time.</strong>";
+        google.script.run.withSuccessHandler(update).gather_species_info(species_name);
       }
 
       function update(result){
-        var div = document.getElementById('output');
-        div.innerHTML = '<p>' + result + '</p>';
+      var div = document.getElementById('output');
+      div.innerHTML = '<p>' + result + '</p>';
       }
 
       function show_email(email){
 
-        var div = document.getElementById('showemail');
-        div.innerHTML = '<p>Your email: <strong>' + email +'</strong>.</p> <p>Make sure that you <strong>USE THE EMAIL ADDRESS ABOVE</strong> as you are filling out forms -- it is how we know if you finished a species or not.</p>';
+      var div = document.getElementById('showemail');
+      div.innerHTML = '<p>Your email: <strong>' + email +'</strong>. <font color="red">Make sure that you <strong>USE THE SAME EMAIL ADDRESS EACH TIME YOU FILL OUT THIS FORM</strong> -- it is how we know if you finished a species or not.</font></p>';
       }
 
       function show_dropdown(dropdown_code){
 
-        var div = document.getElementById('familydiv');
-        div.innerHTML = dropdown_code;
+      var div = document.getElementById('familydiv');
+      div.innerHTML = dropdown_code;
       }
 
 
       // NOT MINE https://www.w3schools.com/howto/howto_js_filter_dropdown.asp AND IS NOT MINE
       function filterFunction() {
-  var input, filter, ul, li, a, i;
-  input = document.getElementById("familysearch");
-  filter = input.value.toUpperCase();
-  div = document.getElementById("myDropdown");
-  a = div.getElementsByTagName("a");
-  for (i = 0; i < a.length; i++) {
-    txtValue = a[i].textContent || a[i].innerText;
-    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+      var input, filter, ul, li, a, i;
+      input = document.getElementById("familysearch");
+      filter = input.value.toUpperCase();
+      div = document.getElementById("myDropdown");
+      a = div.getElementsByTagName("a");
+      for (i = 0; i < a.length; i++) {
+      txtValue = a[i].textContent || a[i].innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
       a[i].style.display = "";
-    } else {
+      } else {
       a[i].style.display = "none";
-    }
-  }
-}
+      }
+      }
+      }
 
       google.script.run.withSuccessHandler(show_email).getEmail();
       google.script.run.withSuccessHandler(show_dropdown).generate_dropdown();
 
-      function update_search(str_value){
 
-        var family_input = document.getElementById("familysearch");
-        family_input.value = str_value;
-        filterFunction();
+      function update_search(str_value){
+      var family_input = document.getElementById("familysearch");
+      family_input.value = str_value;
+      filterFunction();
       }
+
+      function submit_cval(){
+      var div = document.getElementById('output');
+      var ucval = document.getElementById("ucval");
+      var species_name = document.getElementById("species_name");
+      var species_row = document.getElementById("species_row");
+      var div = document.getElementById('output');
+      var family = document.getElementById('familysearch');
+      var tnstatus = document.getElementById('tnstatus');
+      var kystatus = document.getElementById('kystatus');
+      var wetlanda = document.getElementById('wetlanda');
+      var wetlande = document.getElementById('wetlande');
+      var seen = document.getElementById('showseen');
+      google.script.run.cval_to_sheet(species_name.innerText, species_row.innerText, ucval.value);
+      div.innerHTML = 'Submitting C-value and re-doing search... <strong>Please wait, this may take some time.</strong>';
+      google.script.run.withSuccessHandler(update).generate_result(family.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value);
+      }
+
+
     </script>
   </head>
   <body>
-    <h1> Sift Species </h1>
-    <strong> This form is updated asynchronously -- this would mean that you may have to wait a little bit for information to be updated. Once it does, it will show below.</strong>
-    <p></p>
+    <h1> TNKY C-values Estimation Form </h1>
     <div id="showemail"></div>
+
+    <div style="overflow-y:scroll;">
+    <table id="parametertable" width="100%">
+    <tr>
+    <td valign="top">
     Enter family:
-
-
     <!-- NOT MINE https://www.w3schools.com/howto/howto_js_filter_dropdown.asp -->
     <div id="familydiv" class="dropdown">
     Loading... please wait
-</div>
+    </div>
+    </td>
 
+    <td valign="top">
+    Tennessee Status:
+    <select id="tnstatus">
+    <option value="">None</option>
+    <option value="T">T</option>
+    <option value="E">E</option>
+    <option value="S">S</option>
+    </select>
+    </td>
 
+    <td valign="top">
+    Kentucky Status:
+    <select id="kystatus">
+    <option value="">None</option>
+    <option value="T">T</option>
+    <option value="E">E</option>
+    <option value="S">S</option>
+    </select>
+    </td>
+
+    <td valign="top">
+    Wetland Status (AGCP):
+    <select id="wetlanda">
+    <option value="">None</option>
+    <option value="FAC">FAC</option>
+    <option value="FACU">FACU</option>
+    <option value="FACW">FACW</option>
+    <option value="OBL">OBL</option>
+    <option value="UPL">UPL</option>
+    </select>
+    </td>
+
+    <td valign="top">
+    Wetland Status (EMP):
+    <select id="wetlande">
+    <option value="">None</option>
+    <option value="FAC">FAC</option>
+    <option value="FACU">FACU</option>
+    <option value="FACW">FACW</option>
+    <option value="OBL">OBL</option>
+    <option value="UPL">UPL</option>
+    </select>
+    </td>
+
+    <td valign="top">
+    Show finished?:
+    <select id="showseen">
+    <option value="yes">Yes</option>
+    <option value="no">No</option>
+    </select>
+    </td>
+
+    <td valign="top">
     <form id="myForm" onsubmit="search()">
-      <input type="submit" value="Submit" />
+    <input type="submit" value="Submit" />
     </form>
+    </td>
+    </tr>
+    </table>
+    </div>
+
+    <div id="species_info"></div>
     <div id="output"></div>
+
  </body>
 </html>

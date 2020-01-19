@@ -1,210 +1,239 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <base target="_top">
 
-    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
-    <?!= include('stylesheet') ?>
+<head>
+  <base target="_top">
 
-    <style>
-    #customers {
-    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-    border-collapse: collapse;
-    width: 100%;
-    }
+  <?!= include('google-css-addon') ?>
+  <?!= include('cayman') ?>
+  <?!= include('stylesheet') ?>
 
-    #customers td, #customers th {
-    border: 1px solid #ddd;
-    padding: 8px;
-    }
+  <script>
+    // Prevent forms from submitting.
+    var urow = ''
+    var uid = ''
+    var species_row = ''
 
-    #customers tr:nth-child(even){background-color: #f2f2f2;}
-
-    #customers tr:hover {background-color: #ddd;}
-
-    #customers th {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    text-align: left;
-    background-color: #4CAF50;
-    color: white;
-    }
-
-    </style>
-
-    <script>
-      // Prevent forms from submitting.
-      function preventFormSubmit() {
-        var forms = document.querySelectorAll('form');
-        for (var i = 0; i < forms.length; i++) {
-          forms[i].addEventListener('submit', function(event) {
-            event.preventDefault();
-          });
-        }
+    function preventFormSubmit() {
+      var forms = document.querySelectorAll('form');
+      for (var i = 0; i < forms.length; i++) {
+        forms[i].addEventListener('submit', function(event) {
+          event.preventDefault();
+        });
       }
-      window.addEventListener('load', preventFormSubmit);
+    }
+    window.addEventListener('load', preventFormSubmit);
 
-      function search() {
-        var div = document.getElementById('output');
-        var family = document.getElementById('familysearch');
-        var tnstatus = document.getElementById('tnstatus');
-        var kystatus = document.getElementById('kystatus');
-        var wetlanda = document.getElementById('wetlanda');
-        var wetlande = document.getElementById('wetlande');
-        var seen = document.getElementById('showseen');
-        div.innerHTML = 'Searching for: ' + family.value + ". <strong>Please wait, this may take some time.</strong>";
-        google.script.run.withSuccessHandler(update).generate_result(family.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value);
-      }
-
-      function select_species(species_name) {
-        var div = document.getElementById('output');
-        div.innerHTML = 'Loading information for: ' + species_name + ". <strong>Please wait, this may take some time.</strong>";
-        google.script.run.withSuccessHandler(update).gather_species_info(species_name);
-      }
-
-      function update(result){
+    function search() {
       var div = document.getElementById('output');
-      div.innerHTML = '<p>' + result + '</p>';
+      var uemail = document.getElementById('uemail');
+      var family = document.getElementById('familysearch');
+      var tnstatus = document.getElementById('tnstatus');
+      var kystatus = document.getElementById('kystatus');
+      var wetlanda = document.getElementById('wetlanda');
+      var wetlande = document.getElementById('wetlande');
+      var finished = document.getElementById('showfinished');
+
+      if (family.value.toString() == "") {
+
+        div.innerHTML = 'Searching for species of any family with the given parameters. <strong>Please wait, this may take some time.</strong>';
+      } else {
+        div.innerHTML = 'Searching for species of ' + family.value + " with the given parameters. <strong>Please wait, this may take some time.</strong>";
+
       }
 
-      function show_email(email){
+      google.script.run.withSuccessHandler(update).generate_result(urow, family.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, finished.value);
+    }
 
-      var div = document.getElementById('showemail');
-      div.innerHTML = '<p>Your email: <strong>' + email +'</strong>. <font color="red">Make sure that you <strong>USE THE SAME EMAIL ADDRESS EACH TIME YOU FILL OUT THIS FORM</strong> -- it is how we know if you finished a species or not.</font></p>';
-      }
+    function select_species(species_name) {
+      var div = document.getElementById('output');
+      div.innerHTML = 'Loading information for: ' + species_name + ". <strong>Please wait, this may take some time.</strong>";
+      google.script.run.withSuccessHandler(update).gather_species_info(species_name);
+    }
 
-      function show_dropdown(dropdown_code){
+    function update(result) {
+      species_row = result[0]
+      var innerHTML = result[1]
+      var div = document.getElementById('output');
+      div.innerHTML = '<p>' + innerHTML + '</p>';
+    }
+
+    function show_email_help() {
+
+      alert("We use your ID in order to track your progress. Please do not give your ID to other people, as they may edit your submitted C-values on your behalf.");
+    }
+
+    function show_dropdown(dropdown_code) {
 
       var div = document.getElementById('familydiv');
       div.innerHTML = dropdown_code;
+    }
+
+    function found_id(result) {
+      var div = document.getElementById('real-body');
+      var login_div = document.getElementById('login');
+      var search_div = document.getElementById('paramdiv')
+      var submit_id_button = document.getElementById('submit_id_button');
+      var status_text = document.getElementById('status_text');
+      if (result == 0) {
+        status_text.innerHTML = 'INVALID! Please re-enter ID: <input id="uemail">';
+      } else {
+        status_text.innerHTML = '<p style="line-height: 0px;">Welcome back, ' + result[2] + '.</p><br><br><h2 style="font-weight: 200; line-height: 0px;">Search:</h2>';
+        login_div.removeChild(submit_id_button);
+        div.style = '';
+        search_div.style = 'overflow-y: hidden;';
+        urow = result[1]
       }
+    }
+
+    function submit_id() {
+      var uid = document.getElementById('uemail');
+      var status_text = document.getElementById('status_text');
+      status_text.innerHTML = 'Checking...';
+      google.script.run.withSuccessHandler(found_id).check_id(uid.value);
+
+    }
 
 
-      // NOT MINE https://www.w3schools.com/howto/howto_js_filter_dropdown.asp AND IS NOT MINE
-      function filterFunction() {
+    // NOT MINE https://www.w3schools.com/howto/howto_js_filter_dropdown.asp AND IS NOT MINE
+    function filterFunction() {
       var input, filter, ul, li, a, i;
       input = document.getElementById("familysearch");
       filter = input.value.toUpperCase();
       div = document.getElementById("myDropdown");
       a = div.getElementsByTagName("a");
       for (i = 0; i < a.length; i++) {
-      txtValue = a[i].textContent || a[i].innerText;
-      if (txtValue.toUpperCase().indexOf(filter) > -1) {
-      a[i].style.display = "";
-      } else {
-      a[i].style.display = "none";
+        txtValue = a[i].textContent || a[i].innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+          a[i].style.display = "";
+        } else {
+          a[i].style.display = "none";
+        }
       }
-      }
-      }
+    }
 
-      google.script.run.withSuccessHandler(show_email).getEmail();
-      google.script.run.withSuccessHandler(show_dropdown).generate_dropdown();
+    //        google.script.run.withSuccessHandler(show_email).getEmail();
+    google.script.run.withSuccessHandler(show_dropdown).generate_dropdown();
 
 
-      function update_search(str_value){
+    function update_search(str_value) {
       var family_input = document.getElementById("familysearch");
       family_input.value = str_value;
       filterFunction();
-      }
+    }
 
-      function submit_cval(){
+    function submit_cval() {
       var div = document.getElementById('output');
       var ucval = document.getElementById("ucval");
-      var species_name = document.getElementById("species_name");
-      var species_row = document.getElementById("species_row");
-      var div = document.getElementById('output');
       var family = document.getElementById('familysearch');
       var tnstatus = document.getElementById('tnstatus');
       var kystatus = document.getElementById('kystatus');
       var wetlanda = document.getElementById('wetlanda');
       var wetlande = document.getElementById('wetlande');
-      var seen = document.getElementById('showseen');
-      google.script.run.cval_to_sheet(species_name.innerText, species_row.innerText, ucval.value);
+      var finished = document.getElementById('showfinished');
+      google.script.run.cval_to_sheet(urow, species_row, ucval.value);
       div.innerHTML = 'Submitting C-value and re-doing search... <strong>Please wait, this may take some time.</strong>';
-      google.script.run.withSuccessHandler(update).generate_result(family.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value);
-      }
+      google.script.run.withSuccessHandler(update).generate_result(urow, family.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, finished.value);
+    }
 
+    function nothing() {
 
-    </script>
-  </head>
-  <body>
-    <h1> TNKY C-values Estimation Form </h1>
-    <div id="showemail"></div>
+    }
+  </script>
+</head>
 
-    <div style="overflow-y:scroll;">
-    <table id="parametertable" width="100%">
-    <tr>
-    <td valign="top">
-    Enter family:
-    <!-- NOT MINE https://www.w3schools.com/howto/howto_js_filter_dropdown.asp -->
-    <div id="familydiv" class="dropdown">
-    Loading... please wait
+<body>
+  <section class="page-header">
+    <h1 class="project-name">TNKY C-values Estimation Form</h1>
+    <div id='login'>
+      <h2 class="project-tagline" id='status_text'>Please enter ID: <input id="uemail"></h2>
+      <a href="javascript:;" class="btn" onclick="submit_id()" id="submit_id_button">Submit ID</a>
     </div>
-    </td>
+    <div style="display: none;" id="paramdiv" >
+      <table id="parametertable" class="parametertable" width="100%">
+        <tr>
+          <td valign="top">
+            <!-- NOT MINE https://www.w3schools.com/howto/howto_js_filter_dropdown.asp -->
+            <div id="familydiv" class="dropdown">
+              Loading... please wait
+            </div>
+          </td>
 
-    <td valign="top">
-    Tennessee Status:
-    <select id="tnstatus">
-    <option value="">None</option>
-    <option value="T">T</option>
-    <option value="E">E</option>
-    <option value="S">S</option>
-    </select>
-    </td>
+          <td valign="top">
+            Tennessee Status:
+            <select id="tnstatus">
+              <option value="any">Any</option>
+              <option value="">None</option>
+              <option value="T">T</option>
+              <option value="E">E</option>
+              <option value="S">S</option>
+            </select>
+          </td>
 
-    <td valign="top">
-    Kentucky Status:
-    <select id="kystatus">
-    <option value="">None</option>
-    <option value="T">T</option>
-    <option value="E">E</option>
-    <option value="S">S</option>
-    </select>
-    </td>
+          <td valign="top">
+            Kentucky Status:
+            <select id="kystatus">
+              <option value="any">Any</option>
+              <option value="">None</option>
+              <option value="T">T</option>
+              <option value="E">E</option>
+              <option value="S">S</option>
+            </select>
+          </td>
 
-    <td valign="top">
-    Wetland Status (AGCP):
-    <select id="wetlanda">
-    <option value="">None</option>
-    <option value="FAC">FAC</option>
-    <option value="FACU">FACU</option>
-    <option value="FACW">FACW</option>
-    <option value="OBL">OBL</option>
-    <option value="UPL">UPL</option>
-    </select>
-    </td>
+          <td valign="top">
+            Wetland Status (AGCP):
+            <select id="wetlanda">
+              <option value="any">Any</option>
+              <option value="">None</option>
+              <option value="FAC">FAC</option>
+              <option value="FACU">FACU</option>
+              <option value="FACW">FACW</option>
+              <option value="OBL">OBL</option>
+              <option value="UPL">UPL</option>
+            </select>
+          </td>
 
-    <td valign="top">
-    Wetland Status (EMP):
-    <select id="wetlande">
-    <option value="">None</option>
-    <option value="FAC">FAC</option>
-    <option value="FACU">FACU</option>
-    <option value="FACW">FACW</option>
-    <option value="OBL">OBL</option>
-    <option value="UPL">UPL</option>
-    </select>
-    </td>
+          <td valign="top">
+            Wetland Status (EMP):
+            <select id="wetlande">
+              <option value="any">Any</option>
+              <option value="">None</option>
+              <option value="FAC">FAC</option>
+              <option value="FACU">FACU</option>
+              <option value="FACW">FACW</option>
+              <option value="OBL">OBL</option>
+              <option value="UPL">UPL</option>
+            </select>
+          </td>
 
-    <td valign="top">
-    Show finished?:
-    <select id="showseen">
-    <option value="yes">Yes</option>
-    <option value="no">No</option>
-    </select>
-    </td>
+          <td valign="top">
+            Show finished?:
+            <select id="showfinished">
+              <option value="any">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </td>
 
-    <td valign="top">
-    <form id="myForm" onsubmit="search()">
-    <input type="submit" value="Submit" />
-    </form>
-    </td>
-    </tr>
-    </table>
+          <td valign="top">
+            <form id="myForm" onsubmit="search()">
+              <input type="submit" value="Submit" class="create" />
+            </form>
+          </td>
+        </tr>
+      </table>
     </div>
-
-    <div id="species_info"></div>
+  </section>
+  <br>
+  <div class='real-body' id='real-body' style="display: none;">
     <div id="output"></div>
+  </div>
 
- </body>
+  <footer class="site-footer">
+    <span class="site-footer-credits">View this site's <a target="_blank" href="https://github.com/bgq527/shaw_cval_forms">source code</a> (repository is private). Maintained by <a target="_blank" href="https://github.com/bgq527">Dax🤖</a>.</span>
+  </footer>
+  <br>
+
+</body>
+
 </html>

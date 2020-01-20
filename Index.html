@@ -4,6 +4,7 @@
 <head>
   <base target="_top">
 
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
   <?!= include('google-css-addon') ?>
   <?!= include('cayman') ?>
   <?!= include('stylesheet') ?>
@@ -13,6 +14,7 @@
     var urow = ''
     var uid = ''
     var species_row = ''
+    var save_family = ''
 
     function preventFormSubmit() {
       var forms = document.querySelectorAll('form');
@@ -22,12 +24,15 @@
         });
       }
     }
+
     window.addEventListener('load', preventFormSubmit);
 
     function search() {
       var div = document.getElementById('output');
       var uemail = document.getElementById('uemail');
       var family = document.getElementById('familysearch');
+      var search_family = document.getElementById('myDropdown');
+      var majorgroup = document.getElementById('majorgroup');
       var tnstatus = document.getElementById('tnstatus');
       var kystatus = document.getElementById('kystatus');
       var wetlanda = document.getElementById('wetlanda');
@@ -41,8 +46,9 @@
         div.innerHTML = 'Searching for species of ' + family.value + " with the given parameters. <strong>Please wait, this may take some time.</strong>";
 
       }
+      save_family = family.value;
+      google.script.run.withSuccessHandler(search_results).generate_result(urow, family.value, majorgroup.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, finished.value);
 
-      google.script.run.withSuccessHandler(update).generate_result(urow, family.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, finished.value);
     }
 
     function select_species(species_name) {
@@ -58,6 +64,19 @@
       div.innerHTML = '<p>' + innerHTML + '</p>';
     }
 
+    function regenerate_after_submit(result) {
+      var innerHTML = result[1]
+      var div = document.getElementById('output');
+      div.innerHTML = '<p>' + innerHTML + '</p>';
+      google.script.run.withSuccessHandler(show_dropdown).generate_dropdown(urow, save_family);
+    }
+
+    function search_results(result) {
+      var innerHTML = result[1]
+      var div = document.getElementById('output');
+      div.innerHTML = '<p>' + innerHTML + '</p>';
+    }
+
     function show_email_help() {
 
       alert("We use your ID in order to track your progress. Please do not give your ID to other people, as they may edit your submitted C-values on your behalf.");
@@ -67,6 +86,7 @@
 
       var div = document.getElementById('familydiv');
       div.innerHTML = dropdown_code;
+      filterFunction();
     }
 
     function found_id(result) {
@@ -81,8 +101,9 @@
         status_text.innerHTML = '<p style="line-height: 0px;">Welcome back, ' + result[2] + '.</p><br><br><h2 style="font-weight: 200; line-height: 0px;">Search:</h2>';
         login_div.removeChild(submit_id_button);
         div.style = '';
-        search_div.style = 'overflow-y: hidden;';
+        search_div.style = 'overflow-y: auto;';
         urow = result[1]
+        google.script.run.withSuccessHandler(show_dropdown).generate_dropdown(urow, '');
       }
     }
 
@@ -113,7 +134,6 @@
     }
 
     //        google.script.run.withSuccessHandler(show_email).getEmail();
-    google.script.run.withSuccessHandler(show_dropdown).generate_dropdown();
 
 
     function update_search(str_value) {
@@ -125,15 +145,19 @@
     function submit_cval() {
       var div = document.getElementById('output');
       var ucval = document.getElementById("ucval");
+      var unotes = document.getElementById("speciesnotes");
       var family = document.getElementById('familysearch');
+      var majorgroup = document.getElementById('majorgroup');
       var tnstatus = document.getElementById('tnstatus');
       var kystatus = document.getElementById('kystatus');
       var wetlanda = document.getElementById('wetlanda');
       var wetlande = document.getElementById('wetlande');
       var finished = document.getElementById('showfinished');
-      google.script.run.cval_to_sheet(urow, species_row, ucval.value);
+      var search_div = document.getElementById('myDropdown');
+      google.script.run.cval_to_sheet(urow, species_row, ucval.value, unotes.value);
+      search_div.innerHTML = "Updating status... please wait"
       div.innerHTML = 'Submitting C-value and re-doing search... <strong>Please wait, this may take some time.</strong>';
-      google.script.run.withSuccessHandler(update).generate_result(urow, family.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, finished.value);
+      google.script.run.withSuccessHandler(regenerate_after_submit).generate_result(urow, family.value, majorgroup.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, finished.value);
     }
 
     function nothing() {
@@ -149,7 +173,7 @@
       <h2 class="project-tagline" id='status_text'>Please enter ID: <input id="uemail"></h2>
       <a href="javascript:;" class="btn" onclick="submit_id()" id="submit_id_button">Submit ID</a>
     </div>
-    <div style="display: none;" id="paramdiv" >
+    <div style="display: none;" id="paramdiv">
       <table id="parametertable" class="parametertable" width="100%">
         <tr>
           <td valign="top">
@@ -157,6 +181,17 @@
             <div id="familydiv" class="dropdown">
               Loading... please wait
             </div>
+          </td>
+
+          <td valign="top">
+            Major Group:
+            <select id="majorgroup">
+              <option value="any">Any</option>
+              <option value="Fern or ally">Ferns or Fern Allies</option>
+              <option value="Gymnosperm">Gymnosperms</option>
+              <option value="Angiosperm - monocot">Angiosperms - Monocots</option>
+              <option value="Angiosperm - dicot">Angiosperms - Dicots</option>
+            </select>
           </td>
 
           <td valign="top">

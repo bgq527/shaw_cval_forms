@@ -31,7 +31,7 @@ function check_id(id) {
 
 }
 
-function generate_result(urow, ufamily, umajorgroup, utnstatus, ukystatus, uwetlanda, uwetlande, ufinished) {
+function generate_result(urow, ufamily, umajorgroup, utnstatus, ukystatus, uwetlanda, uwetlande, usupport, ufinished) {
 
   function check_equality(search_parameter, found_value) {
 
@@ -91,6 +91,7 @@ function generate_result(urow, ufamily, umajorgroup, utnstatus, ukystatus, uwetl
       check_equality(ukystatus.toString().toLowerCase(), family_search[row][51].toString().toLowerCase()) &&
       check_equality(uwetlanda.toString().toLowerCase(), family_search[row][52].toString().toLowerCase()) &&
       check_equality(uwetlande.toString().toLowerCase(), family_search[row][53].toString().toLowerCase()) &&
+      check_equality(usupport.toString().toLowerCase(), family_search[row][57].toString().toLowerCase()) &&
       check_equality(ufinished.toString().toLowerCase(), cval_str)
     ) {
 

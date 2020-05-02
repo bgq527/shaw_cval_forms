@@ -37,7 +37,9 @@
       var kystatus = document.getElementById('kystatus');
       var wetlanda = document.getElementById('wetlanda');
       var wetlande = document.getElementById('wetlande');
+      var support = document.getElementById('support');
       var finished = document.getElementById('showfinished');
+
 
       if (family.value.toString() == "") {
 
@@ -47,7 +49,7 @@
 
       }
       save_family = family.value;
-      google.script.run.withSuccessHandler(search_results).generate_result(urow, family.value, majorgroup.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, finished.value);
+      google.script.run.withSuccessHandler(search_results).generate_result(urow, family.value, majorgroup.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, support.value, finished.value);
 
     }
 
@@ -152,12 +154,13 @@
       var kystatus = document.getElementById('kystatus');
       var wetlanda = document.getElementById('wetlanda');
       var wetlande = document.getElementById('wetlande');
+      var support = document.getElementById('support');
       var finished = document.getElementById('showfinished');
       var search_div = document.getElementById('myDropdown');
       google.script.run.cval_to_sheet(urow, species_row, ucval.value, unotes.value);
       search_div.innerHTML = "Updating status... please wait"
       div.innerHTML = 'Submitting C-value and re-doing search... <strong>Please wait, this may take some time.</strong>';
-      google.script.run.withSuccessHandler(regenerate_after_submit).generate_result(urow, family.value, majorgroup.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, finished.value);
+      google.script.run.withSuccessHandler(regenerate_after_submit).generate_result(urow, family.value, majorgroup.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, support.value, finished.value);
     }
 
     function nothing() {
@@ -239,6 +242,16 @@
               <option value="FACW">FACW</option>
               <option value="OBL">OBL</option>
               <option value="UPL">UPL</option>
+            </select>
+          </td>
+
+          <td valign="top">
+            C-Value Support:
+            <select id="support">
+              <option value="any">Any</option>
+              <option value="strongsupport">Strongly supported</option>
+              <option value="weaksupport">Weakly supported</option>
+              <option value="nosupport">No support</option>
             </select>
           </td>
 

@@ -31,7 +31,12 @@ function check_id(id) {
 
 }
 
-function generate_result(urow, ufamily, umajorgroup, utnstatus, ukystatus, uwetlanda, uwetlande, usupport, ufinished) {
+function get_read_sheet(){
+  var family_search = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/1rH7K7ytcVMY-8k3piNH19z899FEJpZSD7G7p8-yUEKU/edit?usp=sharing").getSheetByName("cval_spread").getDataRange().getValues()
+  return family_search
+}
+
+function generate_result(urow, family_search, ufamily, umajorgroup, utnstatus, ukystatus, uwetlanda, uwetlande, usupport, ufinished) {
 
   function check_equality(search_parameter, found_value) {
 
@@ -53,7 +58,11 @@ function generate_result(urow, ufamily, umajorgroup, utnstatus, ukystatus, uwetl
   while (true) {
     var response_sheet = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/1VfRA50cj9PO5sTcqdBrl8riJZqzcmWbpmoRZRlOJlOw/edit?usp=sharing")
     SpreadsheetApp.flush()
+    SpreadsheetApp.flush()
+    SpreadsheetApp.flush()
     var response_sheet_read = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/1VfRA50cj9PO5sTcqdBrl8riJZqzcmWbpmoRZRlOJlOw/edit?usp=sharing").getSheetByName("responses").getDataRange().getValues()
+    SpreadsheetApp.flush()
+    SpreadsheetApp.flush()
     SpreadsheetApp.flush()
     if (response_sheet_read[urow][2] != 'writing') {
       response_sheet.getRange("R" + srow + "C" + 3).setValue('')
@@ -61,7 +70,6 @@ function generate_result(urow, ufamily, umajorgroup, utnstatus, ukystatus, uwetl
     }
   }
 
-  var family_search = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/1rH7K7ytcVMY-8k3piNH19z899FEJpZSD7G7p8-yUEKU/edit?usp=sharing").getSheetByName("cval_spread").getDataRange().getValues()
   var ret_string = '<h2>Search results</h2><table style="width:80%" id=customers>'
   ret_string = ret_string + "<th>Species</th>" + "<th>Your Submitted C-value</th>" + "<th>Your Submitted Additional Notes</th>"
   for (var row = 1; row < family_search.length; row++) {
@@ -91,8 +99,9 @@ function generate_result(urow, ufamily, umajorgroup, utnstatus, ukystatus, uwetl
       check_equality(ukystatus.toString().toLowerCase(), family_search[row][51].toString().toLowerCase()) &&
       check_equality(uwetlanda.toString().toLowerCase(), family_search[row][52].toString().toLowerCase()) &&
       check_equality(uwetlande.toString().toLowerCase(), family_search[row][53].toString().toLowerCase()) &&
-      check_equality(usupport.toString().toLowerCase(), family_search[row][57].toString().toLowerCase()) &&
-      check_equality(ufinished.toString().toLowerCase(), cval_str)
+//      check_equality(usupport.toString().toLowerCase(), family_search[row][57].toString().toLowerCase()) &&
+      check_equality(ufinished.toString().toLowerCase(), cval_str) &&
+      (family_search[row][58].toString() == "*" || family_search[row][59].toString() == "*")
     ) {
 
 
@@ -106,9 +115,7 @@ function generate_result(urow, ufamily, umajorgroup, utnstatus, ukystatus, uwetl
   return [-1, ret_string]
 }
 
-function gather_species_info(species_name) {
-  var family_search = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/1rH7K7ytcVMY-8k3piNH19z899FEJpZSD7G7p8-yUEKU/edit?usp=sharing").getSheetByName("cval_spread").getDataRange().getValues()
-
+function gather_species_info(species_name, family_search) {
   var species_row = -1
   for (var row in family_search) {
     if (species_name.toString().toLowerCase() == family_search[row][1].toString().toLowerCase()) {
@@ -123,8 +130,19 @@ function gather_species_info(species_name) {
 
   var temp_ret_string = ret_string + '<hr width="60%"><h2>C-values</h2><table style="width:60%" id=customers><th>Location</th><th>C-value</th>'
   var num_info = 0
+  var exclude_columns = [
+    '"Appalachian Mountains of KY, TN, NC, SC, GA, AL"',
+    "Coastal Plain of the Southeast",
+    "Illinois",
+    "Indiana",
+    '"Interior Plateau of KY, TN, AL"',
+    "Missouri",
+    '"Piedmont Region of the Southeast NC, SC, GA, AL, MS, FL, TN, KY"',
+    "Southern Coastal Plain",
+    "West Virginia"
+]
   for (var col = 2; col < 47; col++) {
-    if (family_search[species_row][col] != "") {
+    if ((family_search[species_row][col] != "" || family_search[species_row][col] == "0") && !(exclude_columns.indexOf(family_search[0][col]) >= 0)) {
       temp_ret_string = temp_ret_string + "<tr>"
       temp_ret_string = temp_ret_string + '<td><a href="javascript:;">' + family_search[0][col] + ' </a></td>' + "<td>" + family_search[species_row][col] + "</td>"
       temp_ret_string = temp_ret_string + "</tr>"
@@ -158,7 +176,7 @@ function gather_species_info(species_name) {
   return [species_row, ret_string]
 }
 
-function generate_dropdown(urow, save_family) {
+function generate_dropdown(urow, family_search, save_family) {
 
   function getAllIndexes(arr, val) {
     var indexes = [],
@@ -181,21 +199,19 @@ function generate_dropdown(urow, save_family) {
   }
 
   var response_sheet_read = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/1VfRA50cj9PO5sTcqdBrl8riJZqzcmWbpmoRZRlOJlOw/edit?usp=sharing").getSheetByName("responses").getDataRange().getValues()
-  var family_search = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/1rH7K7ytcVMY-8k3piNH19z899FEJpZSD7G7p8-yUEKU/edit?usp=sharing").getSheetByName("cval_spread").getDataRange().getValues()
   var ret_string = '<div id="myDropdown" class="dropdown-content"><input type="text" value="' + save_family + '" placeholder="Search family" id="familysearch" onkeyup="filterFunction()">'
 
   var family_array = []
   var full_family_array = []
 
   for (var row in family_search) {
-
-    full_family_array.push(family_search[row][54].toString().toLowerCase())
+      full_family_array.push(family_search[row][54].toString().toLowerCase())
   }
 
   for (var row = 1; row < family_search.length; row++) {
     var family_string = family_search[row][54].toString().toLowerCase()
 
-    if (family_array.indexOf(family_string) == -1) {
+    if (family_array.indexOf(family_string) == -1 && (family_search[row][58].toString() == "*" || family_search[row][59].toString() == "*")) {
       var all_occurences = getAllIndexes(full_family_array, family_string)
       var complete = 2
 
@@ -237,9 +253,15 @@ function cval_to_sheet(urow, species_row, ucval, unotes) {
 
   response_sheet.getRange("R" + urow + "C" + 3).setValue('writing')
   SpreadsheetApp.flush()
+  SpreadsheetApp.flush()
+  SpreadsheetApp.flush()
   response_sheet.getRange("R" + urow + "C" + species_row).setValue(ucval)
   SpreadsheetApp.flush()
+  SpreadsheetApp.flush()
+  SpreadsheetApp.flush()
   response_sheet.getRange("R" + urow + "C" + notes_col).setValue(unotes)
+  SpreadsheetApp.flush()
+  SpreadsheetApp.flush()
   SpreadsheetApp.flush()
   response_sheet.getRange("R" + urow + "C" + 3).setValue('')
 

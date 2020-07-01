@@ -11,10 +11,11 @@
 
   <script>
     // Prevent forms from submitting.
-    var urow = ''
-    var uid = ''
-    var species_row = ''
-    var save_family = ''
+    var urow = '';
+    var uid = '';
+    var species_row = '';
+    var save_family = '';
+    var read_sheet = [];
 
     function preventFormSubmit() {
       var forms = document.querySelectorAll('form');
@@ -26,6 +27,7 @@
     }
 
     window.addEventListener('load', preventFormSubmit);
+    google.script.run.withSuccessHandler(store_read_sheet).get_read_sheet();
 
     function search() {
       var div = document.getElementById('output');
@@ -37,7 +39,8 @@
       var kystatus = document.getElementById('kystatus');
       var wetlanda = document.getElementById('wetlanda');
       var wetlande = document.getElementById('wetlande');
-      var support = document.getElementById('support');
+      // var support = document.getElementById('support');
+      var support = "any";
       var finished = document.getElementById('showfinished');
 
 
@@ -49,14 +52,15 @@
 
       }
       save_family = family.value;
-      google.script.run.withSuccessHandler(search_results).generate_result(urow, family.value, majorgroup.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, support.value, finished.value);
+
+      google.script.run.withSuccessHandler(search_results).generate_result(urow, read_sheet, family.value, majorgroup.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, support.value, finished.value);
 
     }
 
     function select_species(species_name) {
       var div = document.getElementById('output');
       div.innerHTML = 'Loading information for: ' + species_name + ". <strong>Please wait, this may take some time.</strong>";
-      google.script.run.withSuccessHandler(update).gather_species_info(species_name);
+      google.script.run.withSuccessHandler(update).gather_species_info(species_name, read_sheet);
     }
 
     function update(result) {
@@ -70,13 +74,17 @@
       var innerHTML = result[1]
       var div = document.getElementById('output');
       div.innerHTML = '<p>' + innerHTML + '</p>';
-      google.script.run.withSuccessHandler(show_dropdown).generate_dropdown(urow, save_family);
+      google.script.run.withSuccessHandler(show_dropdown).generate_dropdown(urow, read_sheet, save_family);
     }
 
     function search_results(result) {
       var innerHTML = result[1]
       var div = document.getElementById('output');
       div.innerHTML = '<p>' + innerHTML + '</p>';
+    }
+
+    function store_read_sheet(result) {
+      read_sheet = result
     }
 
     function show_email_help() {
@@ -105,7 +113,8 @@
         div.style = '';
         search_div.style = 'overflow-y: auto;';
         urow = result[1]
-        google.script.run.withSuccessHandler(show_dropdown).generate_dropdown(urow, '');
+        google.script.run.withSuccessHandler(show_dropdown).generate_dropdown(urow, read_sheet, '');
+        search();
       }
     }
 
@@ -135,7 +144,7 @@
       }
     }
 
-    //        google.script.run.withSuccessHandler(show_email).getEmail();
+    // google.script.run.withSuccessHandler(show_email).getEmail();
 
 
     function update_search(str_value) {
@@ -154,13 +163,14 @@
       var kystatus = document.getElementById('kystatus');
       var wetlanda = document.getElementById('wetlanda');
       var wetlande = document.getElementById('wetlande');
-      var support = document.getElementById('support');
+      // var support = document.getElementById('support');
+      var support = "any";
       var finished = document.getElementById('showfinished');
       var search_div = document.getElementById('myDropdown');
       google.script.run.cval_to_sheet(urow, species_row, ucval.value, unotes.value);
       search_div.innerHTML = "Updating status... please wait"
       div.innerHTML = 'Submitting C-value and re-doing search... <strong>Please wait, this may take some time.</strong>';
-      google.script.run.withSuccessHandler(regenerate_after_submit).generate_result(urow, family.value, majorgroup.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, support.value, finished.value);
+      google.script.run.withSuccessHandler(regenerate_after_submit).generate_result(urow, read_sheet, family.value, majorgroup.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, support.value, finished.value);
     }
 
     function nothing() {
@@ -245,6 +255,7 @@
             </select>
           </td>
 
+          <!--
           <td valign="top">
             C-Value Support:
             <select id="support">
@@ -254,6 +265,7 @@
               <option value="nosupport">No support</option>
             </select>
           </td>
+          -->
 
           <td valign="top">
             Show finished?:

@@ -199,7 +199,7 @@ function generate_dropdown(urow, family_search, save_family) {
   }
 
   var response_sheet_read = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/1VfRA50cj9PO5sTcqdBrl8riJZqzcmWbpmoRZRlOJlOw/edit?usp=sharing").getSheetByName("responses").getDataRange().getValues()
-  var ret_string = '<div id="myDropdown" class="dropdown-content"><input type="text" value="' + save_family + '" placeholder="Search family" id="familysearch" onkeyup="filterFunction()">'
+  var ret_string = '<input type="text" value="' + save_family + '" placeholder="Search family" id="familysearch" onkeyup="filterFunction()"><div id="myDropdown" class="dropdown-content">'
 
   var family_array = []
   var full_family_array = []

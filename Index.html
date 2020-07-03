@@ -102,7 +102,8 @@
     function found_id(result) {
       var div = document.getElementById('real-body');
       var login_div = document.getElementById('login');
-      var search_div = document.getElementById('paramdiv')
+      var search_div = document.getElementById('paramdiv');
+      var family_div = document.getElementById('familydiv');
       var submit_id_button = document.getElementById('submit_id_button');
       var status_text = document.getElementById('status_text');
       if (result == 0) {
@@ -112,6 +113,7 @@
         login_div.removeChild(submit_id_button);
         div.style = '';
         search_div.style = 'overflow-y: auto;';
+        family_div.style = '';
         urow = result[1]
         google.script.run.withSuccessHandler(show_dropdown).generate_dropdown(urow, read_sheet, '');
         search();
@@ -132,7 +134,8 @@
       var input, filter, ul, li, a, i;
       input = document.getElementById("familysearch");
       filter = input.value.toUpperCase();
-      div = document.getElementById("myDropdown");
+      var div = document.getElementById("myDropdown");
+      div.style = "overflow-y: auto;";
       a = div.getElementsByTagName("a");
       for (i = 0; i < a.length; i++) {
         txtValue = a[i].textContent || a[i].innerText;
@@ -190,14 +193,13 @@
       <table id="parametertable" class="parametertable" width="100%">
         <tr>
           <td valign="top">
-            <!-- NOT MINE https://www.w3schools.com/howto/howto_js_filter_dropdown.asp -->
-            <div id="familydiv" class="dropdown">
+          <!-- NOT MINE https://www.w3schools.com/howto/howto_js_filter_dropdown.asp -->
+            <div style="display: none;" id="familydiv" class="dropdown">
               Loading... please wait
             </div>
           </td>
-
           <td valign="top">
-            Major Group:
+            Major Group: <p>
             <select id="majorgroup">
               <option value="any">Any</option>
               <option value="Fern or ally">Ferns or Fern Allies</option>
@@ -208,7 +210,7 @@
           </td>
 
           <td valign="top">
-            Tennessee Status:
+            Tennessee Status: <p>
             <select id="tnstatus">
               <option value="any">Any</option>
               <option value="">None</option>
@@ -219,7 +221,7 @@
           </td>
 
           <td valign="top">
-            Kentucky Status:
+            Kentucky Status: <p>
             <select id="kystatus">
               <option value="any">Any</option>
               <option value="">None</option>
@@ -230,7 +232,7 @@
           </td>
 
           <td valign="top">
-            Wetland Status (AGCP):
+            Wetland Status (AGCP): <p>
             <select id="wetlanda">
               <option value="any">Any</option>
               <option value="">None</option>
@@ -243,7 +245,7 @@
           </td>
 
           <td valign="top">
-            Wetland Status (EMP):
+            Wetland Status (EMP): <p>
             <select id="wetlande">
               <option value="any">Any</option>
               <option value="">None</option>
@@ -268,7 +270,7 @@
           -->
 
           <td valign="top">
-            Show finished?:
+            Show finished?: <p>
             <select id="showfinished">
               <option value="any">Yes</option>
               <option value="no">No</option>
@@ -283,6 +285,7 @@
         </tr>
       </table>
     </div>
+
   </section>
   <br>
   <div class='real-body' id='real-body' style="display: none;">

@@ -36,7 +36,7 @@ function get_read_sheet(){
   return family_search
 }
 
-function generate_result(urow, family_search, ufamily, umajorgroup, utnstatus, ukystatus, uwetlanda, uwetlande, usupport, ufinished) {
+function generate_result(search_indices, urow, family_search, ufamily, umajorgroup, utnstatus, ukystatus, uwetlanda, uwetlande, usupport, ufinished) {
 
   function check_equality(search_parameter, found_value) {
 
@@ -72,6 +72,8 @@ function generate_result(urow, family_search, ufamily, umajorgroup, utnstatus, u
 
   var ret_string = '<h2>Search results</h2><table style="width:80%" id=customers>'
   ret_string = ret_string + "<th>Species</th>" + "<th>Your Submitted C-value</th>" + "<th>Your Submitted Additional Notes</th>"
+  if (search_indices.length == 0) {
+    var new_search_indices = []
   for (var row = 1; row < family_search.length; row++) {
 
     var cval_str = ""
@@ -104,18 +106,45 @@ function generate_result(urow, family_search, ufamily, umajorgroup, utnstatus, u
       (family_search[row][58].toString() == "*" || family_search[row][59].toString() == "*")
     ) {
 
-
+      new_search_indices.push(row)
       ret_string = ret_string + "<tr>"
-      ret_string = ret_string + '<td><a href="javascript:;" onclick="select_species(this.innerText)">' + family_search[row][1] + '</a></td>' + "<td>" + cval_str + "</td>" + "<td>" + notes_str + "</td>"
+      ret_string = ret_string + '<td><a href="javascript:;" onclick="select_species(this.innerText, \'' + cval_str.toString() + '\', \''+ notes_str.toString() +'\')">' + family_search[row][1] + '</a></td>' + "<td>" + cval_str + "</td>" + "<td>" + notes_str + "</td>"
       ret_string = ret_string + "</tr>"
     }
   }
   ret_string = ret_string + "</table>"
 
-  return [-1, ret_string]
+  return [-1, ret_string, new_search_indices]
+  } else {
+  for (var row = 0; row < search_indices.length; row++) {
+
+    var cval_str = ""
+    var notes_str = ""
+    var species_col = parseInt(search_indices[row]) + 9
+    var notes_col = parseInt(search_indices[row]) + 3999
+    if (urow != -1) {
+      if (response_sheet_read[urow][species_col] != undefined && response_sheet_read[urow][species_col].toString() != "") {
+        cval_str = response_sheet_read[urow][species_col].toString()
+      }
+
+      if (response_sheet_read[urow][notes_col] != undefined && response_sheet_read[urow][notes_col].toString() != "") {
+        notes_str = response_sheet_read[urow][notes_col].toString()
+      }
+    }
+
+      ret_string = ret_string + "<tr>"
+      ret_string = ret_string + '<td><a href="javascript:;" onclick="select_species(this.innerText, \'' + cval_str.toString() + '\', \''+ notes_str.toString() +'\')">' + family_search[search_indices[row]][1] + '</a></td>' + "<td>" + cval_str + "</td>" + "<td>" + notes_str + "</td>"
+      ret_string = ret_string + "</tr>"
+  }
+  ret_string = ret_string + "</table>"
+
+  return [-1, ret_string, search_indices]
+
+  }
+
 }
 
-function gather_species_info(species_name, family_search) {
+function gather_species_info(species_name, cval, notes, family_search) {
   var species_row = -1
   for (var row in family_search) {
     if (species_name.toString().toLowerCase() == family_search[row][1].toString().toLowerCase()) {
@@ -124,9 +153,9 @@ function gather_species_info(species_name, family_search) {
     }
   }
 
-  var ret_string = '<table style="width:60%" id=customers><tr><td><h2 id="species_name">' + species_name + '</h2><a target="_blank" href="https://dev.tnky.plantatlas.usf.edu/Plant.aspx?id=' + family_search[species_row][0] + '">View this specie on the TNKY Plant Atlas</a></td></tr>'
-  ret_string = ret_string + '<tr><td><strong>Give this species a C-value: </strong><select id="ucval"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="*">Mark as seen/Skip</option><option value="">Delete</option></select>'
-  ret_string = ret_string + ' <input type="text" id="speciesnotes" placeholder="Additional notes"/> <input type="button" class="create" value="Submit C-value" onclick="submit_cval()"/></tr></td></table><br>'
+  var ret_string = '<table style="width:60%" id=customers><tr><td><h2 id="species_name">' + species_name + '</h2><a target="_blank" href="https://tnky.plantatlas.usf.edu/Plant.aspx?id=' + family_search[species_row][0] + '">View this specie on the TNKY Plant Atlas</a></td></tr>'
+  ret_string = ret_string + '<tr><td><strong>Give this species a C-value: </strong><select id="ucval"><option value="'+ cval.toString() + '" selected disabled hidden>' + cval.toString() +'</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="*">Mark as seen/Skip</option><option value="">Delete</option></select>'
+  ret_string = ret_string + ' <input type="text" id="speciesnotes" placeholder="Additional notes" value="' + notes.toString() + '"/> <input type="button" class="create" value="Submit C-value" onclick="submit_cval()"/></tr></td></table><br>'
 
   var temp_ret_string = ret_string + '<hr width="60%"><h2>C-values</h2><table style="width:60%" id=customers><th>Location</th><th>C-value</th>'
   var num_info = 0
@@ -259,10 +288,10 @@ function cval_to_sheet(urow, species_row, ucval, unotes) {
   SpreadsheetApp.flush()
   SpreadsheetApp.flush()
   SpreadsheetApp.flush()
-  response_sheet.getRange("R" + urow + "C" + notes_col).setValue(unotes)
-  SpreadsheetApp.flush()
-  SpreadsheetApp.flush()
-  SpreadsheetApp.flush()
+//  response_sheet.getRange("R" + urow + "C" + notes_col).setValue(unotes)
+//  SpreadsheetApp.flush()
+//  SpreadsheetApp.flush()
+//  SpreadsheetApp.flush()
   response_sheet.getRange("R" + urow + "C" + 3).setValue('')
 
   return 0

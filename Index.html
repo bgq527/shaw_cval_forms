@@ -16,6 +16,7 @@
     var species_row = '';
     var save_family = '';
     var read_sheet = [];
+    var search_indices = [];
 
     function preventFormSubmit() {
       var forms = document.querySelectorAll('form');
@@ -52,15 +53,15 @@
 
       }
       save_family = family.value;
-
-      google.script.run.withSuccessHandler(search_results).generate_result(urow, read_sheet, family.value, majorgroup.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, support.value, finished.value);
+      search_indices = [];
+      google.script.run.withSuccessHandler(search_results).generate_result(search_indices, urow, read_sheet, family.value, majorgroup.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, support.value, finished.value);
 
     }
 
-    function select_species(species_name) {
+    function select_species(species_name, cval, notes) {
       var div = document.getElementById('output');
       div.innerHTML = 'Loading information for: ' + species_name + ". <strong>Please wait, this may take some time.</strong>";
-      google.script.run.withSuccessHandler(update).gather_species_info(species_name, read_sheet);
+      google.script.run.withSuccessHandler(update).gather_species_info(species_name, cval, notes, read_sheet);
     }
 
     function update(result) {
@@ -78,6 +79,7 @@
     }
 
     function search_results(result) {
+      search_indices = result[2]
       var innerHTML = result[1]
       var div = document.getElementById('output');
       div.innerHTML = '<p>' + innerHTML + '</p>';
@@ -173,7 +175,7 @@
       google.script.run.cval_to_sheet(urow, species_row, ucval.value, unotes.value);
       search_div.innerHTML = "Updating status... please wait"
       div.innerHTML = 'Submitting C-value and re-doing search... <strong>Please wait, this may take some time.</strong>';
-      google.script.run.withSuccessHandler(regenerate_after_submit).generate_result(urow, read_sheet, family.value, majorgroup.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, support.value, finished.value);
+      google.script.run.withSuccessHandler(regenerate_after_submit).generate_result(search_indices, urow, read_sheet, family.value, majorgroup.value, tnstatus.value, kystatus.value, wetlanda.value, wetlande.value, support.value, finished.value);
     }
 
     function nothing() {

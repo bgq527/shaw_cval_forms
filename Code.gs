@@ -153,8 +153,15 @@ function gather_species_info(species_name, cval, notes, family_search) {
     }
   }
 
+  var cval_default_select = '<option value="' + cval.toString() + '" selected disabled hidden>' + cval.toString() + '</option>'
+  if (cval.toString() == "*"){
+    cval_default_select = '<option value="*" selected disabled hidden> Mark as seen/Skip </option>'
+  } else if (cval.toString() == ""){
+    cval_default_select = '<option value="" selected disabled hidden> Select value </option>'
+  }
+
   var ret_string = '<table style="width:60%" id=customers><tr><td><h2 id="species_name">' + species_name + '</h2><a target="_blank" href="https://tnky.plantatlas.usf.edu/Plant.aspx?id=' + family_search[species_row][0] + '">View this specie on the TNKY Plant Atlas</a></td></tr>'
-  ret_string = ret_string + '<tr><td><strong>Give this species a C-value: </strong><select id="ucval"><option value="'+ cval.toString() + '" selected disabled hidden>' + cval.toString() +'</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="*">Mark as seen/Skip</option><option value="">Delete</option></select>'
+  ret_string = ret_string + '<tr><td><strong>Give this species a C-value: </strong><select id="ucval">' + cval_default_select + '<option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="*">Mark as seen/Skip</option><option value="">Delete</option></select>'
   ret_string = ret_string + ' <input type="text" id="speciesnotes" placeholder="Additional notes" value="' + notes.toString() + '"/> <input type="button" class="create" value="Submit C-value" onclick="submit_cval()"/></tr></td></table><br>'
 
   var temp_ret_string = ret_string + '<hr width="60%"><h2>C-values</h2><table style="width:60%" id=customers><th>Location</th><th>C-value</th>'

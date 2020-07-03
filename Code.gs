@@ -253,9 +253,9 @@ function generate_dropdown(urow, family_search, save_family) {
 
       for (var index in all_occurences) {
         var occurence_col = parseInt(all_occurences[index]) + 9
-        if (response_sheet_read[urow][occurence_col] == "" || response_sheet_read[urow][occurence_col] == undefined) {
+        if ((response_sheet_read[urow][occurence_col] == "" || response_sheet_read[urow][occurence_col] == undefined) && (family_search[all_occurences[index]][58].toString() == "*" || family_search[all_occurences[index]][59].toString() == "*")) {
           complete = 0
-        } else if (response_sheet_read[urow][occurence_col] == "*") {
+        } else if (response_sheet_read[urow][occurence_col] == "*" && (family_search[all_occurences[index]][58].toString() == "*" || family_search[all_occurences[index]][59].toString() == "*")) {
 
           complete = 1
         }

@@ -288,10 +288,10 @@ function cval_to_sheet(urow, species_row, ucval, unotes) {
   SpreadsheetApp.flush()
   SpreadsheetApp.flush()
   SpreadsheetApp.flush()
-//  response_sheet.getRange("R" + urow + "C" + notes_col).setValue(unotes)
-//  SpreadsheetApp.flush()
-//  SpreadsheetApp.flush()
-//  SpreadsheetApp.flush()
+  response_sheet.getRange("R" + urow + "C" + notes_col).setValue(unotes)
+  SpreadsheetApp.flush()
+  SpreadsheetApp.flush()
+  SpreadsheetApp.flush()
   response_sheet.getRange("R" + urow + "C" + 3).setValue('')
 
   return 0
